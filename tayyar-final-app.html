@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="app-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tayyar - تيار</title>
+    <meta name="theme-color" content="#2c5aa0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2c5aa0;
+            --primary-light: #4a90e2;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --tourism: #e91e63;
+            --electric: #00bcd4;
+            --text: #333;
+            --bg: #f8f9fa;
+            --card: white;
+            --border: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+
+        .language-toggle {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            z-index: 1001;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .language-toggle:hover {
+            background: var(--primary-light);
+        }
+
+        .screen {
+            display: none;
+            min-height: 100vh;
+            padding: 20px 20px 100px;
+            max-width: 400px;
+            margin: 0 auto;
+            background: var(--card);
+            position: relative;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        #screen2.active, #screen4.active, #screen5.active {
+            display: flex;
+            flex-direction: column;
+            padding: 20px 20px 0;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: var(--card);
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .header h2 {
+            font-size: 14px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .map-container {
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+            position: relative;
+            background: #e8f4fd;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .map-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .bus-overlay {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .bus-marker {
+            background: var(--primary);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bus-marker:hover {
+            transform: scale(1.05);
+        }
+
+        .bus-marker.electric {
+            background: var(--electric);
+        }
+
+        .bus-marker.tourism {
+            background: var(--tourism);
+        }
+
+        .bus-stops {
+            margin-bottom: 20px;
+        }
+
+        .bus-stop {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .bus-stop:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .stop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .stop-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .stop-eta {
+            background: var(--success);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .stop-details {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .amenities {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .amenity {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 10px;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .amenity:hover {
+            background: #e0e0e0;
+            transform: translateY(-1px);
+        }
+
+        /* Chat Screen */
+        .chat-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 0 0 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .suggestion {
+            background: #e3f2fd;
+            color: var(--primary);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .suggestion:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+            min-height: 300px;
+            max-height: 60vh;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            margin: 12px 0;
+            padding: 12px 16px;
+            border-radius: 16px;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease-in-out;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background: var(--primary);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .ai-message {
+            background: #f0f0f0;
+            color: var(--text);
+            border-bottom-left-radius: 5px;
+        }
+
+        .chat-input-area {
+            padding: 16px 0 20px;
+            border-top: 1px solid var(--border);
+            background: var(--card);
+            position: sticky;
+            bottom: 0;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+        }
+
+        .send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 70px;
+        }
+
+        .send-btn:hover {
+            background: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        /* Payment Screen */
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .balance {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 8px 0;
+            transition: all 0.3s ease;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .action {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .action-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .action-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Family Screen */
+        .family-member {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--card);
+            border-radius: 12px;
+            margin: 12px 0;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .family-member:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .member-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .member-status {
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .status-traveling {
+            background: #e8f5e8;
+            color: var(--success);
+        }
+
+        .status-arrived {
+            background: #e3f2fd;
+            color: var(--primary);
+        }
+
+        /* Tourism Screen */
+        .route-card {
+            background: linear-gradient(135deg, var(--tourism) 0%, #f06292 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .route-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .route-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .route-price {
+            background: rgba(255,255,255,0.3);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .route-price:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        .attractions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .attraction {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .attraction:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+        }
+
+        /* Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 400px;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 12px;
+            z-index: 1000;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4px;
+            cursor: pointer;
+            color: #666;
+            flex: 1;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item:hover {
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .nav-icon {
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* Modal System */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1003;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 16px;
+            max-width: 320px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            opacity: 0;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-close {
+            background: var(--border);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: #d0d0d0;
+        }
+
+        .action-btn {
+            display: block;
+            width: 100%;
+            margin: 8px 0;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 1002;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+
+        /* Loading Indicators */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .screen {
+                padding: 16px 16px 100px;
+                max-width: 100%;
+            }
+            
+            #screen2.active, #screen4.active, #screen5.active {
+                padding: 16px 16px 0;
+            }
+            
+            .header {
+                padding: 16px 0;
+            }
+        }
+
+        /* Animations */
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+    </style>
+</head>
+<body>
+    <button class="language-toggle" onclick="toggleLanguage()" id="langToggle">عربي</button>
+    
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Title</h3>
+            <div id="modalBody">Content</div>
+            <button class="modal-close" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Home Screen -->
+    <div id="screen1" class="screen active">
+        <header class="header">
+            <h1 data-en="Tayyar" data-ar="تيار">Tayyar</h1>
+            <h2 data-en="Smart Transit" data-ar="النقل الذكي">Smart Transit</h2>
+        </header>
+        
+        <div class="map-container">
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14424.123456789!2d55.5136!3d25.4052!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ef5f43348a67c47%3A0x1bb0f2d7c0b6b8a0!2sAjman%2C%20United%20Arab%20Emirates!5e0!3m2!1sen!2sus!4v1234567890123" 
+                allowfullscreen loading="lazy">
+            </iframe>
+            <div class="bus-overlay">
+                <div class="bus-marker electric" onclick="showBusDetails('AJX')">
+                    ⚡ <span data-en="AJX - 4 min" data-ar="AJX - 4 دقائق">AJX - 4 min</span>
+                </div>
+                <div class="bus-marker tourism" onclick="showBusDetails('RT1')">
+                    🏛️ <span data-en="RT1 - 8 min" data-ar="RT1 - 8 دقائق">RT1 - 8 min</span>
+                </div>
+                <div class="bus-marker" onclick="showBusDetails('B7')">
+                    🚌 <span data-en="B7 - 12 min" data-ar="B7 - 12 دقيقة">B7 - 12 min</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bus-stops">
+            <div class="bus-stop" onclick="showStopDetails('School Complex')">
+                <div class="stop-header">
+                    <div class="stop-name" data-en="School Complex" data-ar="مجمع المدارس">School Complex</div>
+                    <div class="stop-eta" data-en="4 min" data-ar="4 دقائق">4 min</div>
+                </div>
+                <div class="stop-details" data-en="6 min walk" data-ar="6 دقائق مشي">6 min walk</div>
+                <div class="amenities">
+                    <span class="amenity" data-en="⚡ Electric" data-ar="⚡ كهربائي">⚡ Electric</span>
+                    <span class="amenity" data-en="🚻 Facilities" data-ar="🚻 مرافق">🚻 Facilities</span>
+                    <span class="amenity" data-en="☕ Café" data-ar="☕ مقهى">☕ Café</span>
+                </div>
+            </div>
+
+            <div class="bus-stop" onclick="showStopDetails('City Center')">
+                <div class="stop-header">
+                    <div class="stop-name" data-en="City Center" data-ar="سيتي سنتر">City Center</div>
+                    <div class="stop-eta" data-en="12 min" data-ar="12 دقيقة">12 min</div>
+                </div>
+                <div class="stop-details" data-en="15 min walk" data-ar="15 دقيقة مشي">15 min walk</div>
+                <div class="amenities">
+                    <span class="amenity" data-en="🏛️ Tourism" data-ar="🏛️ سياحة">🏛️ Tourism</span>
+                    <span class="amenity" data-en="🛍️ Shopping" data-ar="🛍️ تسوق">🛍️ Shopping</span>
+                    <span class="amenity" data-en="🍽️ Food" data-ar="🍽️ طعام">🍽️ Food</span>
+                </div>
+            </div>
+
+            <div class="bus-stop" onclick="showStopDetails('Al Jurf')">
+                <div class="stop-header">
+                    <div class="stop-name" data-en="Al Jurf" data-ar="الجرف">Al Jurf</div>
+                    <div class="stop-eta" data-en="18 min" data-ar="18 دقيقة">18 min</div>
+                </div>
+                <div class="stop-details" data-en="10 min walk" data-ar="10 دقائق مشي">10 min walk</div>
+                <div class="amenities">
+                    <span class="amenity" data-en="🌊 Beach" data-ar="🌊 شاطئ">🌊 Beach</span>
+                    <span class="amenity" data-en="🚻 Facilities" data-ar="🚻 مرافق">🚻 Facilities</span>
+                    <span class="amenity" data-en="🏝️ Park" data-ar="🏝️ حديقة">🏝️ Park</span>
+                </div>
+            </div>
+
+            <div class="bus-stop" onclick="showStopDetails('University')">
+                <div class="stop-header">
+                    <div class="stop-name" data-en="UAE University" data-ar="جامعة الإمارات">UAE University</div>
+                    <div class="stop-eta" data-en="22 min" data-ar="22 دقيقة">22 min</div>
+                </div>
+                <div class="stop-details" data-en="5 min walk" data-ar="5 دقائق مشي">5 min walk</div>
+                <div class="amenities">
+                    <span class="amenity" data-en="🎓 Campus" data-ar="🎓 حرم جامعي">🎓 Campus</span>
+                    <span class="amenity" data-en="📚 Library" data-ar="📚 مكتبة">📚 Library</span>
+                    <span class="amenity" data-en="🍽️ Food" data-ar="🍽️ طعام">🍽️ Food</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chat Screen -->
+    <div id="screen2" class="screen">
+        <header class="header">
+            <h1 data-en="AI Assistant" data-ar="المساعد الذكي">AI Assistant</h1>
+            <h2 data-en="Trip Planning" data-ar="تخطيط الرحلات">Trip Planning</h2>
+        </header>
+        
+        <div class="chat-content">
+            <div class="suggestions">
+                <button class="suggestion" onclick="sendSuggestion(this)" data-en="Plan route" data-ar="خطط الطريق">Plan route</button>
+                <button class="suggestion" onclick="sendSuggestion(this)" data-en="Find amenities" data-ar="ابحث عن المرافق">Find amenities</button>
+                <button class="suggestion" onclick="sendSuggestion(this)" data-en="Tourism routes" data-ar="الطرق السياحية">Tourism routes</button>
+                <button class="suggestion" onclick="sendSuggestion(this)" data-en="Check delays" data-ar="تحقق من التأخير">Check delays</button>
+                <button class="suggestion" onclick="sendSuggestion(this)" data-en="Villa routes" data-ar="طرق الفلل">Villa routes</button>
+                <button class="suggestion" onclick="sendSuggestion(this)" data-en="Electric buses" data-ar="الباصات الكهربائية">Electric buses</button>
+            </div>
+            
+            <div class="chat-container" id="chatContainer">
+                <div class="message ai-message" id="welcomeMessage">
+                    <span data-en="👋 <strong>Welcome to Tayyar!</strong><br><br>How can I help you today?" data-ar="👋 <strong>مرحباً بك في طيار!</strong><br><br>كيف يمكنني مساعدتك اليوم؟">👋 <strong>Welcome to Tayyar!</strong><br><br>How can I help you today?</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input-area">
+            <div class="chat-input-container">
+                <input type="text" id="chatInput" placeholder="Ask me anything..." class="chat-input" data-en="Ask me anything..." data-ar="اسألني أي شيء...">
+                <button onclick="sendMessage()" class="send-btn" data-en="Send" data-ar="إرسال">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Screen -->
+    <div id="screen3" class="screen">
+        <header class="header">
+            <h1 data-en="Masaar Pay" data-ar="دفع مسار">Masaar Pay</h1>
+            <h2 data-en="Digital Wallet" data-ar="المحفظة الرقمية">Digital Wallet</h2>
+        </header>
+        
+        <div class="card balance-card">
+            <div data-en="Balance" data-ar="الرصيد">Balance</div>
+            <div class="balance" id="balance">127.50 AED</div>
+        </div>
+
+        <div class="actions-grid">
+            <div class="action" onclick="topUpBalance()">
+                <div class="action-icon">💳</div>
+                <div class="action-label" data-en="Top Up" data-ar="إعادة الشحن">Top Up</div>
+            </div>
+            <div class="action" onclick="initiateNFCPayment()">
+                <div class="action-icon">📱</div>
+                <div class="action-label" data-en="NFC Pay" data-ar="دفع NFC">NFC Pay</div>
+            </div>
+            <div class="action" onclick="showPasses()">
+                <div class="action-icon">🎫</div>
+                <div class="action-label" data-en="Passes" data-ar="الاشتراكات">Passes</div>
+            </div>
+            <div class="action" onclick="showTransactionHistory()">
+                <div class="action-icon">📊</div>
+                <div class="action-label" data-en="History" data-ar="السجل">History</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 data-en="Recent Transactions" data-ar="المعاملات الأخيرة">Recent Transactions</h3>
+            <div id="transactionList" style="margin-top: 12px; font-size: 14px; color: #666;">
+                <div class="transaction" style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px 0; border-bottom: 1px solid var(--border);">
+                    <span data-en="Bus AJX - Today" data-ar="باص AJX - اليوم">Bus AJX - Today</span>
+                    <span style="color: var(--danger);">-3.50 AED</span>
+                </div>
+                <div class="transaction" style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px 0; border-bottom: 1px solid var(--border);">
+                    <span data-en="Top Up - Yesterday" data-ar="شحن - أمس">Top Up - Yesterday</span>
+                    <span style="color: var(--success);">+50.00 AED</span>
+                </div>
+                <div class="transaction" style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px 0; border-bottom: 1px solid var(--border);">
+                    <span data-en="Bus B7 - Yesterday" data-ar="باص B7 - أمس">Bus B7 - Yesterday</span>
+                    <span style="color: var(--danger);">-3.50 AED</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Family Screen -->
+    <div id="screen4" class="screen">
+        <header class="header">
+            <h1 data-en="Family" data-ar="العائلة">Family</h1>
+            <h2 data-en="Track Members" data-ar="تتبع الأفراد">Track Members</h2>
+        </header>
+
+        <div id="familyMembers">
+            <div class="family-member" onclick="showMemberDetails('Khalid')">
+                <div class="member-info">
+                    <div class="member-avatar">K</div>
+                    <div>
+                        <div style="font-weight: 600;" data-en="Khalid" data-ar="خالد">Khalid</div>
+                        <div style="font-size: 12px; color: #666;" data-en="On Bus AJX → City Center" data-ar="في الباص AJX → سيتي سنتر">On Bus AJX → City Center</div>
+                        <div style="font-size: 10px; color: #999;" data-en="ETA: 7:15 PM" data-ar="الوصول المتوقع: 7:15 مساءً">ETA: 7:15 PM</div>
+                    </div>
+                </div>
+                <div class="member-status status-traveling" data-en="Traveling" data-ar="في الطريق">Traveling</div>
+            </div>
+
+            <div class="family-member" onclick="showMemberDetails('Sara')">
+                <div class="member-info">
+                    <div class="member-avatar">S</div>
+                    <div>
+                        <div style="font-weight: 600;" data-en="Sara" data-ar="سارة">Sara</div>
+                        <div style="font-size: 12px; color: #666;" data-en="On Bus B7 → Al Noor School" data-ar="في الباص B7 → مدرسة النور">On Bus B7 → Al Noor School</div>
+                        <div style="font-size: 10px; color: #999;" data-en="ETA: 7:30 PM" data-ar="الوصول المتوقع: 7:30 مساءً">ETA: 7:30 PM</div>
+                    </div>
+                </div>
+                <div class="member-status status-traveling" data-en="Traveling" data-ar="في الطريق">Traveling</div>
+            </div>
+
+            <div class="family-member" onclick="showMemberDetails('Ahmed')">
+                <div class="member-info">
+                    <div class="member-avatar">A</div>
+                    <div>
+                        <div style="font-weight: 600;" data-en="Ahmed" data-ar="أحمد">Ahmed</div>
+                        <div style="font-size: 12px; color: #666;" data-en="At UAE University" data-ar="في جامعة الإمارات">At UAE University</div>
+                        <div style="font-size: 10px; color: #999;" data-en="Arrived: 6:45 PM" data-ar="وصل: 6:45 مساءً">Arrived: 6:45 PM</div>
+                    </div>
+                </div>
+                <div class="member-status status-arrived" data-en="Arrived" data-ar="وصل">Arrived</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 data-en="Settings" data-ar="الإعدادات">Settings</h3>
+            <div style="margin-top: 16px; display: grid; gap: 12px;">
+                <div class="action" onclick="toggleNotifications()">
+                    <div class="action-icon">🔔</div>
+                    <div class="action-label" data-en="Notifications" data-ar="الإشعارات">Notifications</div>
+                </div>
+                <div class="action" onclick="addFamilyMember()">
+                    <div class="action-icon">➕</div>
+                    <div class="action-label" data-en="Add Member" data-ar="إضافة فرد">Add Member</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tourism Screen -->
+    <div id="screen5" class="screen">
+        <header class="header">
+            <h1 data-en="Tourism" data-ar="السياحة">Tourism</h1>
+            <h2 data-en="Discover Ajman" data-ar="اكتشف عجمان">Discover Ajman</h2>
+        </header>
+
+        <div class="route-card">
+            <div class="route-header">
+                <div class="route-name" data-en="Discovery Pass" data-ar="تذكرة الاستكشاف">Discovery Pass</div>
+                <div class="route-price" onclick="purchaseDiscoveryPass()" data-en="15 AED/day" data-ar="15 درهم/يوم">15 AED/day</div>
+            </div>
+            <div style="font-size: 14px; margin-bottom: 8px;" data-en="All-day access to tourist routes" data-ar="وصول طوال اليوم للطرق السياحية">All-day access to tourist routes</div>
+            <div class="attractions">
+                <span class="attraction" onclick="showAttractionDetails('Museum')" data-en="🏛️ Museum" data-ar="🏛️ المتحف">🏛️ Museum</span>
+                <span class="attraction" onclick="showAttractionDetails('Corniche')" data-en="🌊 Corniche" data-ar="🌊 الكورنيش">🌊 Corniche</span>
+                <span class="attraction" onclick="showAttractionDetails('Al Zorah')" data-en="🏝️ Al Zorah" data-ar="🏝️ الزوراء">🏝️ Al Zorah</span>
+                <span class="attraction" onclick="showAttractionDetails('Mall')" data-en="🛍️ Mall" data-ar="🛍️ المول">🛍️ Mall</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 data-en="Popular Routes" data-ar="الطرق الشائعة">Popular Routes</h3>
+            <div style="margin-top: 16px; display: grid; gap: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8f9fa; border-radius: 8px; cursor: pointer;" onclick="showRouteDetails('RT1')">
+                    <span data-en="RT1: City Heritage Tour" data-ar="RT1: جولة التراث">RT1: City Heritage Tour</span>
+                    <span style="color: var(--primary); font-weight: 600;" data-en="Every 20 min" data-ar="كل 20 دقيقة">Every 20 min</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8f9fa; border-radius: 8px; cursor: pointer;" onclick="showRouteDetails('RT2')">
+                    <span data-en="RT2: Beach & Nature" data-ar="RT2: الشاطئ والطبيعة">RT2: Beach & Nature</span>
+                    <span style="color: var(--primary); font-weight: 600;" data-en="Every 30 min" data-ar="كل 30 دقيقة">Every 30 min</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8f9fa; border-radius: 8px; cursor: pointer;" onclick="showRouteDetails('RT3')">
+                    <span data-en="RT3: Hotel Circuit" data-ar="RT3: دائرة الفنادق">RT3: Hotel Circuit</span>
+                    <span style="color: var(--primary); font-weight: 600;" data-en="Every 25 min" data-ar="كل 25 دقيقة">Every 25 min</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 data-en="Villa Community Routes" data-ar="طرق مجتمعات الفلل">Villa Community Routes</h3>
+            <div style="margin-top: 16px;">
+                <div style="padding: 16px; background: linear-gradient(135deg, var(--electric) 0%, #4dd0e1 100%); color: white; border-radius: 12px; cursor: pointer; transition: all 0.3s ease;" onclick="showMinibusDetails('Al Amerah')" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-weight: 600;" data-en="🚐 Al Amerah Minibus" data-ar="🚐 حافلة صغيرة العامرة">🚐 Al Amerah Minibus</span>
+                        <span data-en="Every 10-15 min" data-ar="كل 10-15 دقيقة">Every 10-15 min</span>
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.9;" data-en="Electric mini-buses • 7.2 km route • 8 stops" data-ar="حافلات صغيرة كهربائية • مسار 7.2 كم • 8 محطات">Electric mini-buses • 7.2 km route • 8 stops</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="showScreen(1)" data-screen="1">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-label" data-en="Home" data-ar="الرئيسية">Home</div>
+        </div>
+        <div class="nav-item" onclick="showScreen(2)" data-screen="2">
+            <div class="nav-icon">🤖</div>
+            <div class="nav-label" data-en="AI" data-ar="ذكي">AI</div>
+        </div>
+        <div class="nav-item" onclick="showScreen(3)" data-screen="3">
+            <div class="nav-icon">💳</div>
+            <div class="nav-label" data-en="Pay" data-ar="دفع">Pay</div>
+        </div>
+        <div class="nav-item" onclick="showScreen(4)" data-screen="4">
+            <div class="nav-icon">👨‍👩‍👧‍👦</div>
+            <div class="nav-label" data-en="Family" data-ar="العائلة">Family</div>
+        </div>
+        <div class="nav-item" onclick="showScreen(5)" data-screen="5">
+            <div class="nav-icon">🏛️</div>
+            <div class="nav-label" data-en="Tourism" data-ar="السياحة">Tourism</div>
+        </div>
+    </nav>
+
+    <script>
+        let currentLanguage = 'en';
+        
+        function showScreen(screenNumber) {
+            document.querySelectorAll('.screen').forEach(s => {
+                s.classList.remove('active');
+                s.scrollTop = 0;
+            });
+            
+            document.querySelectorAll('.nav-item').forEach(n => {
+                n.classList.remove('active');
+            });
+            
+            const screen = document.getElementById(`screen${screenNumber}`);
+            const nav = document.querySelector(`[data-screen="${screenNumber}"]`);
+            
+            if (screen) {
+                screen.classList.add('active', 'slide-in');
+                setTimeout(() => screen.classList.remove('slide-in'), 300);
+                
+                if (nav) nav.classList.add('active');
+                
+                if (screenNumber === 2) {
+                    setTimeout(() => document.getElementById('chatInput').focus(), 300);
+                }
+            }
+        }
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+            const root = document.getElementById('app-root');
+            const toggle = document.getElementById('langToggle');
+            
+            if (currentLanguage === 'ar') {
+                root.setAttribute('dir', 'rtl');
+                toggle.textContent = 'English';
+            } else {
+                root.setAttribute('dir', 'ltr');
+                toggle.textContent = 'عربي';
+            }
+            
+            document.querySelectorAll('[data-en]').forEach(el => {
+                const text = el.getAttribute(`data-${currentLanguage}`);
+                if (text) {
+                    if (el.tagName === 'INPUT') {
+                        el.placeholder = text;
+                    } else {
+                        if (text.includes('<')) {
+                            el.innerHTML = text;
+                        } else {
+                            el.textContent = text;
+                        }
+                    }
+                }
+            });
+            
+            showNotification(currentLanguage === 'en' ? 'Language changed to English' : 'تم تغيير اللغة إلى العربية');
+        }
+
+        // Chat functionality with comprehensive responses
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                addMessage(message, 'user');
+                input.value = '';
+                
+                showTypingIndicator();
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    handleAIResponse(message);
+                }, 1500);
+            }
+        }
+
+        function showTypingIndicator() {
+            const chatContainer = document.getElementById('chatContainer');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.className = 'message ai-message';
+            typingDiv.innerHTML = '<div style="display: flex; gap: 4px; align-items: center;"><span>AI is typing</span><span style="animation: bounce 0.6s infinite 0.1s;">.</span><span style="animation: bounce 0.6s infinite 0.2s;">.</span><span style="animation: bounce 0.6s infinite 0.3s;">.</span></div>';
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        function sendSuggestion(button) {
+            const text = button.textContent;
+            document.getElementById('chatInput').value = text;
+            sendMessage();
+        }
+
+        function addMessage(content, type) {
+            const container = document.getElementById('chatContainer');
+            const msg = document.createElement('div');
+            msg.classList.add('message', `${type}-message`, 'fade-in');
+            
+            if (type === 'ai') {
+                msg.innerHTML = content;
+            } else {
+                msg.textContent = content;
+            }
+            
+            container.appendChild(msg);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function handleAIResponse(message) {
+            const lower = message.toLowerCase();
+            let response = '';
+            
+            if (lower.includes('villa') && (lower.includes('route') || lower.includes('minibus') || lower.includes('community'))) {
+                response = '🏘️ <strong>Villa Community Routes</strong><br><br>🚐 <strong>Al Amerah Electric Minibus Service</strong><br><br>⚡ <strong>Key Features:</strong><br>• 100% electric, zero-emission vehicles<br>• Every 10-15 minutes (6:00 AM - 10:00 PM)<br>• 7.2 km route with 8 strategically placed stops<br>• 13-minute total journey time<br><br>🏠 <strong>Coverage:</strong><br>• All villa communities within 5-10 min walk<br>• Connects residential areas to main transit at Al Jurf<br>• Wheelchair accessible with low-floor entry<br>• Bike racks available for multimodal transport<br><br>💰 <strong>Affordable:</strong> Standard Masaar fare (3.50 AED)<br>🌱 <strong>Sustainable:</strong> Car-free suburban living solution!';
+            } else if (lower.includes('tourism') && lower.includes('route')) {
+                response = '🏛️ <strong>Tourism Discovery Routes</strong><br><br>🎫 <strong>Rihlat Ajman Discovery Pass - 15 AED/day</strong><br>Unlimited access to all tourist routes + 10% attraction discounts!<br><br>🚌 <strong>RT1: Heritage & Culture (Every 20 min)</strong><br>• Ajman Museum → Traditional Souk → Ajman Corniche<br>• 45-minute full loop with audio guides<br>• Perfect for history and culture enthusiasts<br><br>🏖️ <strong>RT2: Beach & Nature (Every 30 min)</strong><br>• Al Zorah Nature Reserve → Marina → Public Beaches<br>• 40-minute loop with mangrove tours<br>• Great for families and nature lovers<br><br>🏨 <strong>RT3: Hotel Circuit (Every 25 min)</strong><br>• Fairmont → Oberoi → Ajman Saray → City Center<br>• 35-minute luxury hotel route<br>• Includes luggage assistance<br><br>🎯 <strong>550,000+ tourists</strong> visited Ajman in 2022 using these routes!';
+            } else if (lower.includes('plan') || lower.includes('route')) {
+                response = '🗺️ <strong>Route Planning</strong><br><br>📍 From your location near School Complex:<br><br>🎯 <strong>Popular destinations:</strong><br>• <strong>City Center</strong> - 12 min via Bus B7<br>• <strong>UAE University</strong> - 22 min via Bus AJX (⚡ Electric)<br>• <strong>Al Jurf Beach</strong> - 18 min via Bus B7<br>• <strong>Ajman Corniche</strong> - 15 min via RT1 (Tourism)<br><br>💡 <strong>Pro tip:</strong> Electric buses have dedicated lanes and signal priority for faster travel!';
+            } else if (lower.includes('amenities') || lower.includes('facilities')) {
+                response = '🏢 <strong>Nearby Amenities</strong><br><br>🚻 <strong>Restrooms:</strong><br>• School Complex Stop - Clean, accessible facilities<br>• City Center - Family rooms with baby changing<br>• University - Multiple locations<br><br>☕ <strong>Food & Drink:</strong><br>• Costa Coffee - 2 min walk from School Complex<br>• Subway & KFC - Inside City Center<br>• Cafeteria - UAE University campus<br><br>🏧 <strong>ATMs & Banking:</strong><br>• ADCB ATM - School Complex (Masaar top-up available)<br>• Emirates NBD - City Center<br>• Multiple ATMs - University area';
+            } else if (lower.includes('tourism') || lower.includes('attractions')) {
+                response = '🏛️ <strong>Tourism & Attractions</strong><br><br>🎫 <strong>Discovery Pass - Only 15 AED/day</strong><br>Unlimited access to all tourist routes!<br><br>🚌 <strong>RT1: Heritage Tour (Every 20 min)</strong><br>• Ajman Museum - Traditional crafts & history<br>• Old Souk - Authentic local markets<br>• Ajman Corniche - Beautiful waterfront<br><br>🏖️ <strong>RT2: Beach & Nature (Every 30 min)</strong><br>• Al Zorah Nature Reserve - Mangroves & wildlife<br>• Public beaches - Swimming & water sports<br>• Marina walkway - Dining & entertainment<br><br>🎫 Tap "Purchase Discovery Pass" to buy now!';
+            } else if (lower.includes('delay') || lower.includes('time') || lower.includes('status')) {
+                response = '⏰ <strong>Live Service Status</strong><br><br>🟢 <strong>All routes running normally:</strong><br>• <strong>Bus AJX</strong> (⚡ Electric) - On time, next arrival 4 min<br>• <strong>Bus B7</strong> - On time, next arrival 12 min<br>• <strong>RT1</strong> (Tourism) - On time, next arrival 8 min<br>• <strong>RT2</strong> (Beach) - Minor 2 min delay<br><br>⚡ <strong>Traffic solutions active:</strong><br>• Bus lanes operational during peak hours<br>• Signal priority for electric buses<br>• Real-time GPS tracking<br><br>📱 Updates every 30 seconds via smart city integration';
+            } else if ((lower.includes('villa') || lower.includes('suburb') || lower.includes('community') || lower.includes('minibus')) && !lower.includes('route')) {
+                response = '🏘️ <strong>Villa Community Transport</strong><br><br>🚐 <strong>Suburban Minibus Network</strong><br>Connecting villa communities to main transit corridors<br><br>📍 <strong>Currently Serving:</strong><br>• <strong>Al Amerah Community</strong> - 8 stops, 7.2 km<br>• <strong>Al Nuaimiya Villas</strong> - 6 stops, 5.8 km<br>• <strong>Al Rashidiya Residential</strong> - 10 stops, 9.1 km<br><br>🕐 <strong>Operating Schedule:</strong><br>• Peak hours: Every 10-15 minutes<br>• Off-peak: Every 20-25 minutes<br>• Service hours: 6:00 AM - 10:00 PM daily<br><br>🔄 <strong>Main Connections:</strong><br>• Al Jurf (Beach & B7 bus connection)<br>• City Center (Shopping & RT1/RT3 tourism)<br>• School Complex (AJX electric bus)<br><br>♿ <strong>Accessibility:</strong> All minibuses are wheelchair accessible with ramps';
+            } else if (lower.includes('electric') || lower.includes('green') || lower.includes('environment')) {
+                response = '⚡ <strong>Electric Bus Fleet</strong><br><br>🌱 <strong>Environmental benefits:</strong><br>• 100% electric buses on main routes (AJX, AJY)<br>• Zero emissions in city center<br>• 60% quieter than diesel buses<br>• Solar-powered charging stations<br><br>🚌 <strong>Electric advantages:</strong><br>• Dedicated bus lanes<br>• Traffic signal priority<br>• 8+ minutes faster than regular traffic<br>• Real-time tracking & arrival predictions<br><br>🔌 <strong>Charging network:</strong><br>• 12 charging stations across Ajman<br>• 99.5% fleet uptime<br>• Smart grid integration';
+            } else if (lower.includes('pay') || lower.includes('masaar') || lower.includes('balance')) {
+                response = '💳 <strong>Masaar Payment System</strong><br><br>💰 <strong>Your current balance:</strong> 127.50 AED<br><br>📱 <strong>Payment methods:</strong><br>• <strong>NFC:</strong> Tap phone to bus reader<br>• <strong>QR Code:</strong> Scan at entrance<br>• <strong>Physical card:</strong> Traditional tap & go<br><br>💡 <strong>Top-up options:</strong><br>• Mobile app (instant transfer)<br>• ATM machines (50+ locations)<br>• Retail stores (Carrefour, Lulu, etc.)<br>• Online banking portal<br><br>🎫 <strong>Save money:</strong> Monthly passes offer 25% discount for frequent travelers!';
+            } else if (lower.includes('family') || lower.includes('track') || lower.includes('children')) {
+                response = '👨‍👩‍👧‍👦 <strong>Family Tracking & Safety</strong><br><br>📱 <strong>Currently tracking:</strong><br>• <strong>Khalid</strong> - On Bus AJX, arriving City Center in 8 min<br>• <strong>Sara</strong> - On Bus B7, ETA Al Noor School 15 min<br>• <strong>Ahmed</strong> - Safely arrived at UAE University<br><br>🔔 <strong>Smart notifications:</strong><br>• Bus departure alerts (5 min before)<br>• Safe arrival confirmations<br>• Route delay notifications<br>• Emergency contact alerts<br><br>🛡️ <strong>Privacy & security:</strong><br>• End-to-end encrypted location data<br>• Only family members can see tracking<br>• Data automatically deleted after 24 hours';
+            } else if (lower.includes('hello') || lower.includes('hi') || lower.includes('help')) {
+                response = '👋 <strong>Welcome to Tayyar AI!</strong><br><br>I\'m here to help with all your transit needs:<br><br>🚌 <strong>What I can do:</strong><br>• Plan optimal routes & transfers<br>• Real-time bus tracking & ETAs<br>• Find nearby amenities & services<br>• Tourism routes & attraction info<br>• Masaar payment & balance help<br>• Family member tracking<br>• Service updates & delays<br>• Villa community minibus info<br><br>💬 <strong>Try asking:</strong><br>"How do I get to City Center?"<br>"Where are the nearest restrooms?"<br>"Show me tourism routes"<br>"Check my Masaar balance"';
+            } else if (lower.includes('university') || lower.includes('student')) {
+                response = '🎓 <strong>University Transport</strong><br><br>🚌 <strong>Best route to UAE University:</strong><br>• Take Bus AJX (⚡ Electric) from School Complex<br>• Journey time: 22 minutes<br>• Frequency: Every 12 minutes<br>• Cost: 3.50 AED with Masaar<br><br>🎒 <strong>Student benefits:</strong><br>• Student monthly pass: 75 AED (50% off)<br>• Early morning services (6:00 AM start)<br>• Late evening return trips (until 10:00 PM)<br>• Study areas at major stops<br><br>📚 <strong>Campus amenities:</strong><br>• Library, food court, prayer rooms<br>• Bike parking at bus stop<br>• Free WiFi while waiting';
+            } else {
+                response = '🤖 <strong>AI Assistant</strong><br><br>I understand you\'re asking about: <em>"' + message + '"</em><br><br>🚌 <strong>I can help with:</strong><br>• Route planning & navigation<br>• Live bus tracking & timing<br>• Payment & balance queries<br>• Tourism & attractions info<br>• Family member tracking<br>• Villa minibus services<br>• Environmental info (electric buses)<br><br>💬 <strong>Try being more specific:</strong><br>"Plan route to [destination]"<br>"Find amenities near [location]"<br>"Show tourism routes"<br>"Check bus delays"<br>"Villa community transport"';
+            }
+            
+            addMessage(response, 'ai');
+        }
+
+        // Enhanced payment functions
+        function topUpBalance() {
+            showModal('Top Up Balance', 
+                'Choose your top-up amount:<br><br>' +
+                '<button class="action-btn" onclick="processPayment(25)">25 AED</button>' +
+                '<button class="action-btn" onclick="processPayment(50)">50 AED</button>' +
+                '<button class="action-btn" onclick="processPayment(100)">100 AED</button>' +
+                '<button class="action-btn" onclick="processPayment(200)">200 AED</button>'
+            );
+        }
+
+        function initiateNFCPayment() {
+            showModal('NFC Payment', 
+                '📱 <strong>Ready for NFC Payment</strong><br><br>' +
+                'Hold your phone near the NFC reader on the bus entrance.<br><br>' +
+                '<div class="spinner"></div><br>' +
+                'Waiting for connection...'
+            );
+            
+            setTimeout(() => {
+                document.getElementById('modalBody').innerHTML = 
+                    '✅ <strong>Payment Successful!</strong><br><br>' +
+                    'Amount: 3.50 AED<br>' +
+                    'Route: Bus AJX<br>' +
+                    'New balance: 124.00 AED<br><br>' +
+                    'Have a safe journey!';
+                updateBalance(-3.50);
+                addTransaction('Bus AJX - Just now', -3.50);
+            }, 3000);
+        }
+
+        function showPasses() {
+            showModal('Monthly Passes', 
+                'Available subscription options:<br><br>' +
+                '<button class="action-btn" onclick="processPayment(-75, \'Student Pass purchased!\')">Student Pass - 75 AED/month<br><small>50% discount for students</small></button>' +
+                '<button class="action-btn" onclick="processPayment(-150, \'Regular Pass purchased!\')">Regular Pass - 150 AED/month<br><small>Unlimited rides on all routes</small></button>' +
+                '<button class="action-btn" onclick="processPayment(-45, \'Tourist Pass purchased!\')">Tourist Pass - 45 AED/week<br><small>Includes all tourism routes</small></button>'
+            );
+        }
+
+        function showTransactionHistory() {
+            const history = `
+                <div style="text-align: left; font-size: 14px; line-height: 1.6;">
+                    <div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: #f9f9f9; border-radius: 6px;">
+                        <span>Bus AJX - Today 6:30 PM</span>
+                        <span style="color: var(--danger); font-weight: 600;">-3.50 AED</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: #f9f9f9; border-radius: 6px;">
+                        <span>Top Up - Yesterday</span>
+                        <span style="color: var(--success); font-weight: 600;">+50.00 AED</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: #f9f9f9; border-radius: 6px;">
+                        <span>Bus B7 - Yesterday 4:15 PM</span>
+                        <span style="color: var(--danger); font-weight: 600;">-3.50 AED</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: #f9f9f9; border-radius: 6px;">
+                        <span>Monthly Pass - Oct 1</span>
+                        <span style="color: var(--danger); font-weight: 600;">-75.00 AED</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: #f9f9f9; border-radius: 6px;">
+                        <span>Top Up ATM - Sep 30</span>
+                        <span style="color: var(--success); font-weight: 600;">+100.00 AED</span>
+                    </div>
+                </div>
+            `;
+            showModal('Transaction History', history);
+        }
+
+        function processPayment(amount, successMessage = '') {
+            closeModal();
+            
+            if (amount > 0) {
+                showModal('Processing Payment', 
+                    '💳 Processing top-up...<br><br>' +
+                    '<div class="spinner"></div><br>' +
+                    'Please wait...'
+                );
+                
+                setTimeout(() => {
+                    updateBalance(amount);
+                    addTransaction(`Top Up - Just now`, amount);
+                    document.getElementById('modalBody').innerHTML = 
+                        `✅ <strong>Top-up Successful!</strong><br><br>` +
+                        `Amount added: ${amount} AED<br>` +
+                        `New balance: ${parseFloat(document.getElementById('balance').textContent) + amount} AED`;
+                    showNotification(`+${amount} AED added to your balance`);
+                }, 2000);
+            } else {
+                updateBalance(amount);
+                addTransaction(successMessage.replace(' purchased!', '') + ' - Just now', amount);
+                showNotification(successMessage);
+            }
+        }
+
+        function updateBalance(amount) {
+            const balanceElement = document.getElementById('balance');
+            const currentBalance = parseFloat(balanceElement.textContent);
+            const newBalance = currentBalance + amount;
+            balanceElement.textContent = newBalance.toFixed(2) + ' AED';
+            
+            // Animate balance change
+            balanceElement.style.transform = 'scale(1.1)';
+            balanceElement.style.color = amount >= 0 ? 'white' : '#ffcccc';
+            
+            setTimeout(() => {
+                balanceElement.style.transform = 'scale(1)';
+                balanceElement.style.color = 'white';
+            }, 500);
+        }
+
+        function addTransaction(title, amount) {
+            const transactionList = document.getElementById('transactionList');
+            const transaction = document.createElement('div');
+            transaction.className = 'transaction fade-in';
+            transaction.style.cssText = 'display: flex; justify-content: space-between; margin: 8px 0; padding: 8px 0; border-bottom: 1px solid var(--border);';
+            
+            const titleSpan = document.createElement('span');
+            titleSpan.textContent = title;
+            
+            const amountSpan = document.createElement('span');
+            amountSpan.textContent = (amount >= 0 ? '+' : '') + amount.toFixed(2) + ' AED';
+            amountSpan.style.color = amount >= 0 ? 'var(--success)' : 'var(--danger)';
+            
+            transaction.appendChild(titleSpan);
+            transaction.appendChild(amountSpan);
+            
+            transactionList.insertBefore(transaction, transactionList.firstChild);
+        }
+
+        // Family & Modal functions
+        function showMemberDetails(name) {
+            let info = '';
+            switch(name) {
+                case 'Khalid':
+                    info = `<strong>👦 Khalid</strong><br><br>
+                        📍 Currently on Bus AJX<br>
+                        🎯 Destination: City Center<br>
+                        ⏰ ETA: 7:15 PM (8 minutes)<br>
+                        🛣️ Next stop: Al Bustan<br><br>
+                        🔔 Notifications: Active<br>
+                        📱 Last update: 30 seconds ago`;
+                    break;
+                case 'Sara':
+                    info = `<strong>👧 Sara</strong><br><br>
+                        📍 Currently on Bus B7<br>
+                        🎯 Destination: Al Noor School<br>
+                        ⏰ ETA: 7:30 PM (15 minutes)<br>
+                        🛣️ Next stop: Al Jurf<br><br>
+                        🔔 Notifications: Active<br>
+                        📱 Last update: 45 seconds ago`;
+                    break;
+                case 'Ahmed':
+                    info = `<strong>👨 Ahmed</strong><br><br>
+                        ✅ Safely arrived at UAE University<br>
+                        🕐 Arrival time: 6:45 PM<br>
+                        🛣️ Journey: Home → University (22 min)<br>
+                        🚌 Used: Bus AJX (Electric)<br><br>
+                        📊 Journey history available<br>
+                        📱 Status confirmed: 15 minutes ago`;
+                    break;
+            }
+            showModal('Family Member Details', info);
+        }
+
+        function toggleNotifications() {
+            const isEnabled = localStorage.getItem('notificationsEnabled') !== 'false';
+            localStorage.setItem('notificationsEnabled', !isEnabled);
+            showNotification(isEnabled ? 'Notifications disabled' : 'Notifications enabled');
+        }
+
+        function addFamilyMember() {
+            showModal('Add Family Member', 
+                'Add a new family member to track:<br><br>' +
+                '<input type="text" placeholder="Member name" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; margin: 8px 0;"><br>' +
+                '<input type="text" placeholder="Phone number" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; margin: 8px 0;"><br>' +
+                '<button class="action-btn" onclick="showNotification(\'Family member added successfully!\'); closeModal();">Add Member</button>'
+            );
+        }
+
+        // Tourism & Attraction functions
+        function showAttractionDetails(attraction) {
+            let info = '';
+            switch(attraction) {
+                case 'Museum':
+                    info = `<strong>🏛️ Ajman Museum</strong><br><br>
+                        📍 Located in historic 18th-century fort<br>
+                        🕘 Hours: 9:00 AM - 7:00 PM daily<br>
+                        🎫 Entry: 5 AED (Free with Discovery Pass)<br><br>
+                        🏺 <strong>Exhibits:</strong><br>
+                        • Traditional Emirati life<br>
+                        • Archaeological artifacts<br>
+                        • Maritime history<br>
+                        • Manuscript collection<br><br>
+                        🚌 Served by RT1 every 20 minutes`;
+                    break;
+                case 'Corniche':
+                    info = `<strong>🌊 Ajman Corniche</strong><br><br>
+                        🏖️ 4km beautiful waterfront promenade<br>
+                        🌅 Perfect for sunset views<br><br>
+                        🏃‍♂️ <strong>Activities:</strong><br>
+                        • Jogging & cycling paths<br>
+                        • Beach access & swimming<br>
+                        • Restaurants & cafés<br>
+                        • Children's play areas<br>
+                        • Evening markets<br><br>
+                        🚌 Served by RT1 every 20 minutes<br>
+                        🅿️ Free parking available`;
+                    break;
+                case 'Al Zorah':
+                    info = `<strong>🏝️ Al Zorah Nature Reserve</strong><br><br>
+                        🌿 Protected mangrove ecosystem<br>
+                        🏌️ Championship golf course<br>
+                        🛥️ Luxury marina & residences<br><br>
+                        🚣‍♀️ <strong>Activities:</strong><br>
+                        • Kayaking tours<br>
+                        • Paddleboarding<br>
+                        • Bird watching<br>
+                        • Nature walks<br>
+                        • Fine dining restaurants<br><br>
+                        🚌 Served by RT2 every 30 minutes`;
+                    break;
+                case 'Mall':
+                    info = `<strong>🛍️ City Center Ajman</strong><br><br>
+                        🏬 80+ international stores & brands<br>
+                        🕘 Hours: 10:00 AM - 10:00 PM daily<br><br>
+                        🎯 <strong>Features:</strong><br>
+                        • Carrefour hypermarket<br>
+                        • VOX Cinemas (8 screens)<br>
+                        • Magic Planet entertainment<br>
+                        • 25+ restaurants & cafés<br>
+                        • Prayer rooms & nursery<br><br>
+                        🚌 Major transport hub - all routes stop here`;
+                    break;
+            }
+            showModal('Attraction Information', info);
+        }
+
+        function showRouteDetails(routeId) {
+            let info = '';
+            switch(routeId) {
+                case 'RT1':
+                    info = `<strong>🏛️ RT1: City Heritage Tour</strong><br><br>
+                        ⏰ Every 20 minutes | 45 min full loop<br><br>
+                        🚏 <strong>Route stops:</strong><br>
+                        1. City Center Ajman<br>
+                        2. Ajman Museum<br>
+                        3. Traditional Souk<br>
+                        4. Ajman Corniche<br>
+                        5. Heritage Village<br>
+                        6. Luxury Hotels District<br><br>
+                        🎫 Day Pass: 15 AED (Unlimited rides)<br>
+                        🎧 Audio guide available in Arabic & English`;
+                    break;
+                case 'RT2':
+                    info = `<strong>🏖️ RT2: Beach & Nature</strong><br><br>
+                        ⏰ Every 30 minutes | 40 min full loop<br><br>
+                        🚏 <strong>Route stops:</strong><br>
+                        1. City Center Ajman<br>
+                        2. Al Zorah Nature Reserve<br>
+                        3. Marina & Golf Resort<br>
+                        4. Public Beach Access<br>
+                        5. Beachfront Hotels<br>
+                        6. Fishing Harbor<br><br>
+                        🎫 Day Pass: 15 AED (Unlimited rides)<br>
+                        🏊‍♀️ Beach equipment rental available`;
+                    break;
+                case 'RT3':
+                    info = `<strong>🏨 RT3: Hotel Circuit</strong><br><br>
+                        ⏰ Every 25 minutes | 35 min full loop<br><br>
+                        🚏 <strong>Route stops:</strong><br>
+                        1. Fairmont Ajman<br>
+                        2. Ajman Saray Resort<br>
+                        3. Oberoi Beach Resort<br>
+                        4. Ramada Hotel<br>
+                        5. City Center Ajman<br><br>
+                        🎫 Day Pass: 15 AED (Unlimited rides)<br>
+                        🧳 Luggage assistance available`;
+                    break;
+            }
+            showModal('Tourism Route Details', info + '<br><button class="action-btn" onclick="purchaseDiscoveryPass()">Purchase Day Pass (15 AED)</button>');
+        }
+
+        function showMinibusDetails(route) {
+            showModal('Villa Minibus Service',
+                `<strong>🚐 Al Amerah Electric Minibus</strong><br><br>
+                ⚡ 100% electric, zero-emission vehicles<br>
+                🕘 Operating hours: 6:00 AM - 10:00 PM<br>
+                ⏰ Frequency: Every 10-15 minutes<br><br>
+                📏 <strong>Route details:</strong><br>
+                • Total distance: 7.2 km<br>
+                • 8 stops throughout community<br>
+                • 13 minutes end-to-end<br>
+                • Connects to Bus B7 at Al Jurf<br><br>
+                ✅ <strong>Accessibility:</strong><br>
+                • Wheelchair accessible<br>
+                • Low-floor entry<br>
+                • All villas within 5-10 min walk<br>
+                • Bike racks available<br><br>
+                💰 Standard Masaar fare: 3.50 AED`
+            );
+        }
+
+        function showBusDetails(busId) {
+            let info = '';
+            switch(busId) {
+                case 'AJX':
+                    info = `<strong>⚡ Electric Bus AJX</strong><br><br>
+                        📍 Current location: 4 minutes from School Complex<br>
+                        🛣️ Route: School Complex → University → City Center<br>
+                        ⏰ Next arrival: 4 minutes<br><br>
+                        ✨ <strong>Features:</strong><br>
+                        • Free WiFi & USB charging<br>
+                        • Wheelchair accessible<br>
+                        • Air conditioning<br>
+                        • Real-time announcements<br><br>
+                        🚦 Bus lane active - 8 min time savings<br>
+                        🔋 100% electric - zero emissions`;
+                    break;
+                case 'RT1':
+                    info = `<strong>🏛️ Tourism Bus RT1</strong><br><br>
+                        📍 Current location: 8 minutes from City Center<br>
+                        🛣️ Route: Heritage Tour Circuit<br>
+                        ⏰ Next arrival: 8 minutes<br><br>
+                        ✨ <strong>Features:</strong><br>
+                        • Panoramic windows<br>
+                        • Multilingual audio guides<br>
+                        • Tourist information displays<br>
+                        • Souvenir sales onboard<br><br>
+                        🎫 Day Pass required (15 AED)<br>
+                        📱 Digital tour guide app available`;
+                    break;
+                case 'B7':
+                    info = `<strong>🚌 Bus B7</strong><br><br>
+                        📍 Current location: 12 minutes from School Complex<br>
+                        🛣️ Route: School Complex → Al Jurf → City Center<br>
+                        ⏰ Next arrival: 12 minutes<br><br>
+                        ✨ <strong>Features:</strong><br>
+                        • WiFi & USB charging<br>
+                        • Air conditioning<br>
+                        • Priority seating for elderly<br>
+                        • Bike racks (2 bikes)<br><br>
+                        🏖️ Serves beach and shopping areas<br>
+                        ♿ Fully accessible`;
+                    break;
+            }
+            showModal('Bus Information', info);
+        }
+
+        function showStopDetails(stopName) {
+            let info = '';
+            switch(stopName) {
+                case 'School Complex':
+                    info = `<strong>🚏 School Complex Bus Stop</strong><br><br>
+                        🚌 <strong>Buses serving this stop:</strong><br>
+                        • AJX (⚡ Electric) - 4 min<br>
+                        • B7 - 12 min<br><br>
+                        🏢 <strong>Nearby amenities:</strong><br>
+                        • Clean restrooms with baby changing<br>
+                        • Costa Coffee (2 min walk)<br>
+                        • ADCB ATM (Masaar top-up)<br>
+                        • Covered waiting area<br>
+                        • Real-time arrival displays<br><br>
+                        🎓 Main stop for 5 schools in area<br>
+                        📍 6 minutes walk from your location`;
+                    break;
+                case 'City Center':
+                    info = `<strong>🚏 City Center Bus Stop</strong><br><br>
+                        🚌 <strong>Buses serving this stop:</strong><br>
+                        • B7 - 12 min<br>
+                        • RT1 (Tourism) - 8 min<br>
+                        • RT3 (Hotels) - 15 min<br><br>
+                        🏢 <strong>Major amenities:</strong><br>
+                        • Full shopping mall<br>
+                        • 25+ restaurants & food court<br>
+                        • VOX Cinemas<br>
+                        • Multiple ATMs<br>
+                        • Prayer rooms & nursery<br><br>
+                        🚇 Main transfer hub - all routes connect here<br>
+                        📍 15 minutes walk from your location`;
+                    break;
+                case 'Al Jurf':
+                    info = `<strong>🚏 Al Jurf Bus Stop</strong><br><br>
+                        🚌 <strong>Buses serving this stop:</strong><br>
+                        • B7 - 18 min<br>
+                        • Villa minibus connection<br><br>
+                        🏖️ <strong>Beach area amenities:</strong><br>
+                        • Public beach access<br>
+                        • Restrooms & shower facilities<br>
+                        • Beachside cafés<br>
+                        • Public park with playground<br>
+                        • Free parking area<br><br>
+                        🚐 Connect to Al Amerah minibus here<br>
+                        📍 10 minutes walk from your location`;
+                    break;
+                case 'University':
+                    info = `<strong>🚏 UAE University Bus Stop</strong><br><br>
+                        🚌 <strong>Buses serving this stop:</strong><br>
+                        • AJX (⚡ Electric) - 22 min<br><br>
+                        🎓 <strong>Campus amenities:</strong><br>
+                        • Student services center<br>
+                        • Multiple cafeterias<br>
+                        • Library access<br>
+                        • Prayer rooms<br>
+                        • ATM machines<br>
+                        • Bike parking & rental<br><br>
+                        🎒 Student monthly pass: 75 AED (50% off)<br>
+                        📍 5 minutes walk to main campus`;
+                    break;
+            }
+            showModal('Bus Stop Information', info);
+        }
+
+        function purchaseDiscoveryPass() {
+            showModal('Purchase Discovery Pass',
+                `<strong>🎫 Tourism Discovery Pass</strong><br><br>
+                ✅ Unlimited rides on all tourism routes<br>
+                ✅ Valid for 24 hours from first use<br>
+                ✅ Audio guides included<br>
+                ✅ 10% discount at partner attractions<br><br>
+                💰 <strong>Price: 15 AED</strong><br><br>
+                <button class="action-btn" onclick="processPayment(-15, 'Discovery Pass purchased! Valid for 24 hours.')">Purchase Now (15 AED)</button>`
+            );
+        }
+
+        // Utility functions
+        function showModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalBody').innerHTML = content;
+            const modal = document.getElementById('modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            showScreen(1);
+            
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') sendMessage();
+                });
+            }
+            
+            // Auto-refresh live data
+            setInterval(() => {
+                document.querySelectorAll('.stop-eta').forEach(eta => {
+                    if (eta.textContent.includes('min')) {
+                        let minutes = parseInt(eta.textContent);
+                        if (minutes > 1) {
+                            eta.textContent = `${minutes - 1} min`;
+                        } else {
+                            eta.textContent = 'Arriving';
+                            eta.style.background = 'var(--warning)';
+                        }
+                    }
+                });
+                
+                document.querySelectorAll('.bus-marker span').forEach(marker => {
+                    const text = marker.textContent;
+                    if (text.includes('min')) {
+                        const parts = text.split(' - ');
+                        let minutes = parseInt(parts[1]);
+                        if (minutes > 1) {
+                            marker.textContent = `${parts[0]} - ${minutes - 1} min`;
+                        }
+                    }
+                });
+            }, 30000);
+            
+            // Simulate family updates
+            setInterval(() => {
+                const traveling = document.querySelectorAll('.status-traveling');
+                if (traveling.length > 0 && Math.random() > 0.8) {
+                    const member = traveling[Math.floor(Math.random() * traveling.length)];
+                    const name = member.closest('.family-member').querySelector('[style*="font-weight: 600"]').textContent;
+                    
+                    member.textContent = 'Arrived';
+                    member.className = 'member-status status-arrived';
+                    
+                    if (localStorage.getItem('notificationsEnabled') !== 'false') {
+                        showNotification(`${name} has arrived safely!`);
+                    }
+                }
+            }, 45000);
+        });
+    </script>
+</body>
+</html>
